@@ -4,8 +4,6 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from db.elastic import get_elastic
-from db.redis import get_redis
 from models.genres import (GenreDetailResponseModel, GenreResponseModel,
                            GenreSort)
 from services.utils.body_elastic import get_body_search
@@ -58,10 +56,10 @@ class GenreService(BaseService):
 
         return data_list
 
+from db.redis.redis_storage import redis
+from db.elastic.elastic_storage import elastic
 
 @lru_cache()
 def get_genre_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
     return GenreService(RedisCache(redis), ElasticStorage(elastic))

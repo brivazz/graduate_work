@@ -1,22 +1,24 @@
 from logging import config as logging_config
+from pydantic import BaseSettings, Field
+from dotenv import load_dotenv
+from loguru import logger
 
 from core.logger import LOGGING
+
+load_dotenv()
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
 
-from pydantic import BaseSettings, Field
-
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = Field(..., env='PROJECT_NAME')
-    REDIS_HOST: str = Field(..., env='REDIS_HOST')
-    REDIS_PORT: int = Field(..., env='REDIS_PORT')
-    ELASTIC_HOST: str = Field(..., env='ELASTIC_HOST')
-    ELASTIC_PORT: int = Field(..., env='ELASTIC_PORT')
 
-    class Config:
-        env_file = '.env'
+    REDIS_HOST: str = Field('REDIS_HOST')
+    REDIS_PORT: int = Field('REDIS_PORT')
+
+    ELASTIC_HOST: str = Field('ELASTIC_HOST')
+    ELASTIC_PORT: int = Field('ELASTIC_PORT')
 
 
 settings = Settings()

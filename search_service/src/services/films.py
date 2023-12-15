@@ -1,19 +1,18 @@
 import json
 from functools import lru_cache
 
-from db.elastic import get_elastic
-from db.redis import get_redis
-from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
+
 from models.films import FilmDetailResponseModel, FilmResponseModel, FilmSort
-from redis.asyncio import Redis
 from services.utils.body_elastic import get_body_query, get_body_search
+from services.base import BaseService
+from services.base import get_base_service
 
-from .base import BaseService, ElasticStorage, RedisCache
 
-
-class FilmService(BaseService):
+class FilmService:
     """Сервис реализует возможности получения фильмов."""
+    def __init__(self, base_service: BaseService):
+        self.base_service = base_service
 
     async def get_by_id(
             self,
@@ -21,10 +20,10 @@ class FilmService(BaseService):
     ) -> FilmDetailResponseModel | None:
         """Метод возвращает фильм по id."""
 
-        return await self.get_data_by_id(
+        return await self.base_service.get_data_by_id(
             film_id,
             'movies',
-            self.FILM_CACHE_EXPIRE_IN_SECONDS,
+            self.base_service.FILM_CACHE_EXPIRE_IN_SECONDS,
         )
 
     async def get_film_list(
@@ -51,11 +50,11 @@ class FilmService(BaseService):
             writer=writer
         )
 
-        data_list = await self.get_list(
+        data_list = await self.base_service.get_list(
             index='movies',
             sort_by='imdb_rating',
             sort_order=sort_order,
-            ttl=self.FILM_CACHE_EXPIRE_IN_SECONDS,
+            ttl=self.base_service.FILM_CACHE_EXPIRE_IN_SECONDS,
             body=body,
             page_size=page_size,
             page_number=page_number,
@@ -84,19 +83,19 @@ class FilmService(BaseService):
             offset=(page_size * page_number) - page_size,
         )
 
-        data_list = await self.search_by_query(
+        data_list = await self.base_service.search_by_query(
             index='movies',
             body=body,
             query=query,
-            ttl=self.FILM_CACHE_EXPIRE_IN_SECONDS,
+            ttl=self.base_service.FILM_CACHE_EXPIRE_IN_SECONDS,
             page_size=page_size,
             page_number=page_number,
             process_id=process_id
         )
 
         if process_id:
-            await self.cache_handler.set_by_id(
-                key=process_id,
+            await self.base_service.cache_handler.set_by_id(
+                key=str(process_id),
                 value=(
                     json.dumps([FilmResponseModel(**i).dict() for i in data_list])
                     if data_list
@@ -104,13 +103,11 @@ class FilmService(BaseService):
                 ),
                 ttl=300,
             )
-
         return data_list
 
 
 @lru_cache()
 def get_film_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic)
+        base_service: BaseService = Depends(get_base_service)
 ) -> FilmService:
-    return FilmService(RedisCache(redis), ElasticStorage(elastic))
+    return FilmService(base_service)

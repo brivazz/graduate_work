@@ -32,7 +32,6 @@ async def films_query_list(
         query=query,
         process_id=process_id
     )
-
     return films
 
 

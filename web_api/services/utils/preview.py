@@ -1,6 +1,7 @@
 from adapters import rabbit, redis
 from redis.asyncio import Redis
 from core.config import settings
+from loguru import logger
 
 
 async def startup() -> None:
@@ -12,6 +13,7 @@ async def startup() -> None:
     await rabbit.rabbit.connect(
         url=settings.get_amqp_uri()
     )
+    logger.info(rabbit.rabbit)
 
 
 async def shutdown() -> None:

@@ -1,13 +1,17 @@
-from .handlers import AbstractStorage, AbstractQueue, RedisStorage, RabbitMq
 import uuid
 from aio_pika.exceptions import AMQPException
-from core.logger import logger
+# from core.logger import logger
 from functools import lru_cache
 from redis.asyncio import Redis
 from fastapi import Depends
-from adapters.rabbit import get_rabbit, RMQ
-from adapters.redis import get_redis
+from adapters.redis_di import get_redis
 import base64
+
+from adapters.managers.rabbit_manager import RabbitMq
+from adapters.broker.abstract import AbstractQueue
+from adapters.cache.abstract import AbstractStorage
+from adapters.managers.redis_manager import RedisStorage
+from core.config import settings
 
 class SearchService:
 
@@ -42,11 +46,13 @@ class SearchService:
                 routing_key='events.files',
                 correlation_id=process_id
             )
+            # logger.info(self.queue_handler)
 
             return process_id
 
         except AMQPException as error:
-            logger.error(f'Ошибка сервиса WebApi - {error}')
+            # logger.error(f'Ошибка сервиса WebApi - {error}')
+            pass
 
     async def get_status_task(
         self,
@@ -58,14 +64,14 @@ class SearchService:
         )
         # TODO: Поставить условие на проверку статуса if else
         print(result)
+        return result
 
 
 @lru_cache()
 def get_search_service(
     storage: Redis = Depends(get_redis),
-    queue: RMQ = Depends(get_rabbit),
 ) -> SearchService:
     return SearchService(
         storage_handler=RedisStorage(storage),
-        queue_handler=RabbitMq(queue),
+        queue_handler=RabbitMq(settings.get_amqp_uri()),
     )

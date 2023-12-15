@@ -1,19 +1,22 @@
 from pathlib import Path
 
 from pydantic import BaseSettings, Field
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).parent.parent.parent.absolute()
 
 
 class Settings(BaseSettings):
-    sentry_dsn: str = Field(..., env="SENTRY_DSN")
+    # sentry_dsn: str = Field(..., env="SENTRY_DSN")
 
-    rabbit_host: str = Field(..., env="RABBIT_HOST")
-    rabbit_port: str = Field(..., env="RABBIT_PORT")
-    rabbit_user: str = Field(..., env="RABBIT_USER")
-    rabbit_pass: str = Field(..., env="RABBIT_PASS")
+    rabbit_host: str = Field("RABBIT_HOST")
+    rabbit_port: str = Field("RABBIT_PORT")
+    rabbit_user: str = Field("RABBIT_USER")
+    rabbit_pass: str = Field("RABBIT_PASS")
 
-    search_service_url: str = Field(..., env='SEARCH_SERVICE')
+    search_service_url: str = Field('SEARCH_SERVICE')
 
     celery_broker_url: str = Field(
         "redis://localhost:6379",
@@ -31,9 +34,6 @@ class Settings(BaseSettings):
             host=self.rabbit_host,
             port=self.rabbit_port
         )
-
-    class Config:
-        env_file = BASE_DIR/".env"
 
 
 settings = Settings()

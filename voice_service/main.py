@@ -4,7 +4,7 @@ from aio_pika.abc import AbstractIncomingMessage
 
 from adapters.rabbit import RMQ
 from core.config import settings
-from core.logger import logger
+from loguru import logger
 from worker import request_async_api
 
 
@@ -19,7 +19,7 @@ async def main():
         async for message in iterator:
             async with message.process(ignore_processed=True):
                 logger.info("Получено новое сообщение в очереди")
-                # request_async_api(message)
+                # request_async_api(message.body)
                 request_async_api.delay(message.body)
                 await message.ack()
 

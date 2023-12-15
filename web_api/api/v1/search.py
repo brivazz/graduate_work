@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, UploadFile, Depends
+from fastapi import APIRouter, UploadFile, Depends, HTTPException, status
 from services.base import get_search_service, SearchService
 
 
@@ -34,3 +34,6 @@ async def get_data(
     result = await service.get_status_task(
         process_id=process_id,
     )
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Films not found')
+    return result

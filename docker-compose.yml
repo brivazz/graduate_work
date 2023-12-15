@@ -1,21 +1,22 @@
 version: '3'
 services:
-  nginx:
-    image: nginx:1.23
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d/site.conf:/etc/nginx/conf.d/site.conf:ro
-    depends_on:
-      - web
-    ports:
-      - 80:80
-    logging:
-      driver: gelf
-      options:
-        gelf-address: udp://127.0.0.1:5044
-        tag: nginx
-    networks:
-      - backend
+
+  # nginx:
+  #   image: nginx:1.23
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/conf.d/site.conf:/etc/nginx/conf.d/site.conf:ro
+  #   depends_on:
+  #     - web
+  #   ports:
+  #     - 80:80
+  #   logging:
+  #     driver: gelf
+  #     options:
+  #       gelf-address: udp://127.0.0.1:5044
+  #       tag: nginx
+  #   networks:
+  #     - backend
 
   rabbitmq:
     image: rabbitmq:3.11.13-management-alpine
@@ -33,22 +34,22 @@ services:
     networks:
       - backend
 
-  web:
-    build: ./web_api/
-    env_file:
-      - .env
-    networks:
-      - backend
-    healthcheck:
-      test: curl --fail http://localhost 8000 || exit -1
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    depends_on:
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+  # web:
+  #   build: ./web_api/
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - backend
+  #   healthcheck:
+  #     test: curl --fail http://localhost 8000 || exit -1
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 10
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
 
   celery_worker:
     build: ./voice_service
@@ -62,16 +63,16 @@ services:
       redis:
         condition: service_healthy
 
-  voice_service:
-    build: ./voice_service
-    env_file:
-      - .env
-    networks:
-      - backend
-    restart: always
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+  # voice_service:
+  #   build: ./voice_service
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - backend
+  #   restart: always
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
 
   redis:
     image: redis:latest
@@ -82,6 +83,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 50
+    ports:
+      - 6379:6379
 
   elasticsearch:
     image: elasticsearch:8.6.2
@@ -99,19 +102,19 @@ services:
       timeout: 10s
       retries: 50
 
-  search_service:
-    build: ./search_service/src
-    env_file:
-      - .env
-    networks:
-      - backend
-    ports:
-      - 8000:8000
-    depends_on:
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
+  # search_service:
+  #   build: ./search_service/src
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #     elasticsearch:
+  #       condition: service_healthy
 
 networks:
   backend:

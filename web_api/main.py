@@ -7,14 +7,16 @@ from fastapi.responses import ORJSONResponse
 
 from api.v1 import search
 from core.config import settings
-from services.utils.preview import shutdown, startup
+from adapters.cache.redis_storage import on_startup_redis, on_shutdown_redis
+from adapters.managers.rabbit_manager import RabbitMq
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await startup()
+    RabbitMq(settings.get_amqp_uri())
+    await on_startup_redis()
     yield
-    await shutdown()
+    await on_shutdown_redis()
 
 
 app = FastAPI(
@@ -44,3 +46,8 @@ async def add_process_time_header(request: Request, call_next):
 
 
 app.include_router(search.router, prefix='/api/v1', tags=['search'])
+
+
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True)

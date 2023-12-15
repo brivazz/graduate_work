@@ -1,7 +1,12 @@
+import abc
+import json
+
+from fastapi import Depends
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from redis.asyncio import Redis
-import json
-import abc
+
+from db.redis.redis_storage import get_redis
+from db.elastic.elastic_storage import get_elastic
 
 
 class AbstractStorage(abc.ABC):
@@ -53,12 +58,10 @@ class ElasticStorage(AbstractStorage):
             **kwargs,
     ) -> list[dict]:
         """Метод осуществляет поиск в Elasticsearch."""
-
         data = await self.elastic.search(
             index=kwargs.get('index'),
             body=kwargs.get('body'),
         )
-
         return [item['_source'] for item in data['hits']['hits']]
 
 
@@ -89,8 +92,8 @@ class BaseService:
 
     def __init__(
             self,
-            cache_handler: RedisCache,
-            storage_handler: ElasticStorage,
+            cache_handler: AbstractCache,
+            storage_handler: AbstractStorage,
     ):
         self.cache_handler = cache_handler
         self.storage_handler = storage_handler
@@ -215,3 +218,10 @@ class BaseService:
             )
 
         return data
+
+
+async def get_base_service(
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic)
+):
+    return BaseService(cache_handler=RedisCache(redis), storage_handler=ElasticStorage(elastic))

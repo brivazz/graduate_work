@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     rabbit_user: str = Field(..., env="RABBIT_USER")
     rabbit_pass: str = Field(..., env="RABBIT_PASS")
 
+    # rabbit_uri: str = 'amqp://quest:quest@127.0.0.1:5672/'
     def get_amqp_uri(self):
         return "amqp://{user}:{password}@{host}:{port}/".format(
             user=self.rabbit_user,
