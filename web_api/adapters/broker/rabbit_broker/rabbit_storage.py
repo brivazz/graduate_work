@@ -12,7 +12,7 @@ class RabbitMQ:
     """Класс для создания подключения к RabbitMQ."""
 
     def __init__(self, rabbitmq_uri: str) -> None:
-        """Инициализация обекта."""
+        """Инициализация объекта."""
         self.uri: str = rabbitmq_uri
         self.connection: Optional[Connection] = None
         self.channel: Optional[Channel] = None
@@ -37,3 +37,9 @@ class RabbitMQ:
             self.channel = await self._create_channel()
             self.exchange = await self.channel.get_exchange('topic_v1')
         return self.exchange
+
+    async def close(self):
+        if self.channel:
+            await self.channel.close()
+        if self.connection:
+            await self.connection.close()
