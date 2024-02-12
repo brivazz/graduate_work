@@ -18,15 +18,17 @@ class RabbitMQ:
         self.channel: Optional[aio_pika.RobustChannel] = None
         self.exchange: Optional[aio_pika.Exchange] = None
 
-    async def init_required(self):
+    async def create_queue_and_bind(self):
         """Асинхронная инициализация обменника в брокере."""
         self.channel = await self.connection.channel()
         # self.exchange = await self.channel.get_exchange('topic_v1')
-        self.exchange = await self.channel.declare_exchange('topic_v1', auto_delete=True)
-
-    # async def _declare_queue(self) -> None:
-    #     """Создание очередей."""
-    #     await self.channel.declare_queue('queue_name', durable=True)
+        self.exchange = await self.channel.declare_exchange(
+            name='topic_v1',
+            type='topic',
+            # auto_delete=True
+        )
+        queue = await self.channel.declare_queue('queue_name', durable=True)
+        await queue.bind(self.exchange, 'routing_key')
 
     async def publish(self, msg: BaseModel, routing_key: str, priority: int | None = None):
         """Публикация сообщения в брокере."""
@@ -43,5 +45,5 @@ async def get_broker():
     connection = await get_rabbit()
     logger.info(connection)
     broker = RabbitMQ(connection)
-    await broker.init_required()
+    await broker.create_queue_and_bind()
     return broker
