@@ -1,7 +1,9 @@
+import sys
 import uuid
 from elasticsearch import AsyncElasticsearch
-from elasticsearch.helpers import async_bulk
+from elasticsearch.helpers import async_bulk, BulkIndexError
 from schemes import *
+from core.config import settings
 
 
 def get_es_data():
@@ -84,23 +86,18 @@ def get_es_data():
 
 
 async def es_create_scheme(es_client):
-    await es_client.indices.create(
-        index='movies',
-        body=MOVIES_SCHEMA,
-    )
-    await es_client.indices.create(
-        index='genres',
-        body=GENRES_SCHEMA,
-    )
-    await es_client.indices.create(
-        index='persons',
-        body=PERSONS_SCHEMA,
-    )
+    indexes = ['movies', 'genres', 'persons']
+    for index in indexes:
+        if await es_client.indices.exists(index=index):
+            continue
+        await es_client.indices.create(
+            index=index,
+            body=MOVIES_SCHEMA,
+        )
 
 
 async def es_write_data(es_client):
     documents = []
-    # es_create_scheme()
     test_data = get_es_data()
     for item in test_data:
         index = item.pop('index')
@@ -111,26 +108,24 @@ async def es_write_data(es_client):
                 "_source": item,
             }
         )
-
-    await async_bulk(es_client, documents)
-    await es_client.indices.refresh()
-
-
-async def main():
-    es_client = AsyncElasticsearch(hosts=['http://127.0.0.1:9200'])
-    await es_create_scheme(es_client)
-    await es_write_data(es_client)
-
-    test_data = get_es_data()
-    for item in test_data:
-        index = item.pop('index')
-        res = await es_client.search(index=index, body={'query': {'match_all': {}}})
-        print(res)
-        for hit in res['hits']['hits']:
-            print(hit['_source'])
-
-    await es_client.close()
+    try:
+        await async_bulk(es_client, documents)
+        await es_client.indices.refresh()
+    except BulkIndexError as e:
+        pass
 
 
-import asyncio
-asyncio.run(main())
+async def main(es_client):
+    try:
+        await es_create_scheme(es_client)
+        await es_write_data(es_client)
+    finally:
+        await es_client.close()
+
+if __name__ == '__main__':
+    import asyncio
+    async def run():
+        es_client = AsyncElasticsearch(hosts=[f'{settings.ELASTIC_HOST}:{settings.ELASTIC_PORT}'])
+        await main(es_client)
+
+    asyncio.run(run())

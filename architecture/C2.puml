@@ -1,4 +1,4 @@
-@startuml
+@startuml VoiceAssistant
 skinparam componentStyle uml2
 actor Клиент as Client
 component AsyncAPI

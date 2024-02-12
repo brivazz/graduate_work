@@ -1,4 +1,9 @@
-version: '3'
+version: '3.8'
+
+networks:
+  backend:
+    driver: bridge
+
 services:
 
   # nginx:
@@ -19,18 +24,22 @@ services:
   #     - backend
 
   rabbitmq:
-    image: rabbitmq:3.11.13-management-alpine
+    # image: rabbitmq:3.11.13-management-alpine
+    image: rabbitmq:3.12.6-management
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBIT_PASS}
     ports:
       - 5672:5672
       - 15672:15672
+    env_file:
+      - .env
     healthcheck:
-      test: rabbitmq-diagnostics -q ping
+      # test: rabbitmq-diagnostics -q ping
+      test: [ "CMD", "rabbitmqctl", "status" ]
       interval: 10s
-      timeout: 3s
-      retries: 25
+      timeout: 5s
+      retries: 15
     networks:
       - backend
 
@@ -56,9 +65,12 @@ services:
     command: celery -A worker.celery worker --loglevel=info
     networks:
       - backend
+    env_file:
+      - .env
     environment:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - SEARCH_SERVICE_URL=${SEARCH_SERVICE_URL}
     depends_on:
       redis:
         condition: service_healthy
@@ -73,6 +85,9 @@ services:
   #   depends_on:
   #     rabbitmq:
   #       condition: service_healthy
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+  #     - RABBITMQ_DEFAULT_PASS=${RABBIT_PASS}
 
   redis:
     image: redis:latest
@@ -104,18 +119,18 @@ services:
 
   # search_service:
   #   build: ./search_service/src
+  #   command: sh -c "python migrate.py && tail -f /dev/null"
+  #   restart: unless-stopped
+  #   container_name: search_service
+  #   hostname: search_service
   #   env_file:
   #     - .env
   #   networks:
   #     - backend
   #   ports:
-  #     - 8000:8000
+  #     - 8001:8001
   #   depends_on:
   #     redis:
   #       condition: service_healthy
   #     elasticsearch:
   #       condition: service_healthy
-
-networks:
-  backend:
-    driver: bridge

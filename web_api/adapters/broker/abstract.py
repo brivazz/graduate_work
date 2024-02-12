@@ -1,7 +1,7 @@
 import abc
 
 
-class AbstractQueue(abc.ABC):
+class AbstractBroker(abc.ABC):
     @abc.abstractmethod
     async def send_data(self, *args, **kwargs):
         raise NotImplementedError

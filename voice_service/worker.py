@@ -56,7 +56,6 @@ def recognize_audio(file):
     return translation.text
 
 
-
 @celery.task
 def request_async_api(message: AbstractIncomingMessage):
     decode_body = json.loads(message.decode())
@@ -80,6 +79,7 @@ def request_async_api(message: AbstractIncomingMessage):
 
     requests.get(
         # f"{settings.search_service_url}/{METHODS[type_]}",
-        f"{settings.search_service_url}/api/v1/films/search",
+        f"{settings.search_service_url}api/v1/films/search",
+        # 'http://search_service:8001/api/v1/films/search',
         params=dict(query=text, process_id=process_id)
     )

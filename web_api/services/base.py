@@ -38,15 +38,15 @@ class SearchService:
             if audio_file:
                 print('Файл получен')
 
-            await self.queue_handler.send_data(
-                data={
-                    'process_id': process_id,
-                    'file': content
-                },
-                routing_key='events.files',
-                correlation_id=process_id
-            )
-            # logger.info(self.queue_handler)
+        #     await self.queue_handler.send_data(
+        #         data={
+        #             'process_id': process_id,
+        #             'file': content
+        #         },
+        #         routing_key='events.files',
+        #         correlation_id=process_id
+        #     )
+        #     # logger.info(self.queue_handler)
 
             return process_id
 

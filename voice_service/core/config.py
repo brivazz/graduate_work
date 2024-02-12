@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     rabbit_user: str = Field("RABBIT_USER")
     rabbit_pass: str = Field("RABBIT_PASS")
 
-    search_service_url: str = Field('SEARCH_SERVICE')
+    search_service_url: str = Field('SEARCH_SERVICE_URL')
 
     celery_broker_url: str = Field(
         "redis://localhost:6379",

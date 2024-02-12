@@ -17,27 +17,6 @@ class RabbitMq(AbstractQueue):
         self.channel: Channel | None = None
         self.exchange: Exchange | None = None
 
-    async def _connect(self, topic_name: str = 'topic_v1'):
-        if self.connection is None:
-            self.connection = await aio_pika.connect_robust(self.rabbitmq_uri)
-        return self.connection
-
-    async def _create_channel(self):
-        connection = await self._connect()
-        if self.channel is None:
-            self.channel = await connection.channel()
-        return self.channel
-
-    async def _get_queue(self, queue_name: str):
-        channel = await self._create_channel()
-        return await channel.get_queue(queue_name)
-
-    async def _exchange(self):
-        if self.exchange is None:
-            self.channel = await self._create_channel()
-            self.exchange = await self.channel.get_exchange('topic_v1')
-        return self.exchange
-
     async def send(
         self,
         routing_key: str,
