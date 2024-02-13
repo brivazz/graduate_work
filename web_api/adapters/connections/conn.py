@@ -1,15 +1,18 @@
-from aio_pika import connect_robust
+import aio_pika
 from redis.asyncio import Redis
+from loguru import logger
 
-from broker.rabbit_broker import rabbit_di
-from cache.redis_cache import redis_di
+from adapters.broker.rabbit import rabbit_di
+from adapters.cache.redis_cache import redis_di
 from core.config import settings
 
 
 async def on_startup() -> None:
-    rabbit_di.rabbit = await connect_robust(
-        settings.get_amqp_uri()
+    rabbit_di.rabbit = await aio_pika.connect_robust(
+        settings.broker.get_amqp_uri()
     )
+    logger.info('Rabbit connection success')
+    logger.info(rabbit_di.rabbit)
     redis_di.redis = Redis(
         host=settings.redis_host,
         port=settings.redis_port,
