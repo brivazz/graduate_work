@@ -24,7 +24,7 @@ class RabbitMQ:
             name=settings.broker.exchange_name,
             type='topic',
         )
-        queue = await self.channel.declare_queue(settings.broker.rabbit_queue, durable=True)
+        queue = await self.channel.declare_queue(settings.broker.queue_name, durable=True)
         await queue.bind(self.exchange, 'events.files')
 
     async def publish(self, msg: BaseModel, routing_key: str, priority: int | None = None):
