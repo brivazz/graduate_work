@@ -21,7 +21,7 @@ class RabbitMQ:
         """Асинхронная инициализация обменника в брокере."""
         self.channel = await self.connection.channel()
         self.exchange = await self.channel.declare_exchange(
-            name='topic_v1',
+            name=settings.broker.exchange_name,
             type='topic',
         )
         queue = await self.channel.declare_queue(settings.broker.rabbit_queue, durable=True)
@@ -36,7 +36,6 @@ class RabbitMQ:
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT),
             routing_key=routing_key,
         )
-        print(f'Message {msg} отправлено', f' в очередь {routing_key}')
 
 
 async def get_broker(connection: aio_pika.RobustConnection = Depends(get_rabbit)):
