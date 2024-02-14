@@ -13,10 +13,7 @@ class RedisStorage(AbstractStorage):
 
     async def get_by_id(self, *args, **kwargs) -> dict | None:
         data = await self.redis.get(kwargs.get('key'))
-        if not data:
-            return None
-
-        return json.loads(data)
+        return json.loads(data) if data else None
 
     async def set_by_id(self, *args, **kwargs) -> None:
         await self.redis.set(
