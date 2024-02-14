@@ -27,7 +27,7 @@ class RabbitMQ:
         queue = await self.channel.declare_queue(settings.broker.queue_name, durable=True)
         await queue.bind(self.exchange, 'events.files')
 
-    async def publish(self, msg: BaseModel, routing_key: str, priority: int | None = None):
+    async def publish(self, msg: BaseModel, routing_key: str, priority: int | None = None) -> None:
         """Публикация сообщения в брокере."""
         await self.exchange.publish(
             aio_pika.Message(
@@ -38,7 +38,8 @@ class RabbitMQ:
         )
 
 
-async def get_broker(connection: aio_pika.RobustConnection = Depends(get_rabbit)):
+async def get_broker(connection: aio_pika.RobustConnection = Depends(get_rabbit)) -> RabbitMQ:
+    """DI брокера сообщений."""
     broker = RabbitMQ(connection)
     await broker.create_queue_and_bind()
     return broker
