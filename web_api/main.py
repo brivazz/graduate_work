@@ -7,16 +7,14 @@ from fastapi.responses import ORJSONResponse
 
 from api.v1 import search
 from core.config import settings
-from adapters.cache.redis_storage import on_startup_redis, on_shutdown_redis
-from adapters.managers.rabbit_manager import RabbitMq
+from adapters.connections.conn import on_startup, on_shutdown
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    RabbitMq(settings.get_amqp_uri())
-    await on_startup_redis()
+    await on_startup()
     yield
-    await on_shutdown_redis()
+    await on_shutdown()
 
 
 app = FastAPI(
