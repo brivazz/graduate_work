@@ -9,8 +9,8 @@ def orjson_dumps(v, *, default):
 
 class BaseOrjsonModel(BaseModel):
     class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
+        model_load_json = orjson.loads
+        model_dump_json = orjson_dumps
 
 
 class PaginateQueryParams:
