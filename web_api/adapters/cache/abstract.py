@@ -1,7 +1,7 @@
 import abc
 
 
-class AbstractStorage(abc.ABC):
+class AbstractCache(abc.ABC):
     @abc.abstractmethod
     async def set_by_id(self, *args, **kwargs):
         raise NotImplementedError
