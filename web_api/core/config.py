@@ -1,13 +1,14 @@
 from pathlib import Path
 
-from pydantic import BaseSettings, Field
+from pydantic import Field, ConfigDict
+from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).parent.parent.parent.absolute()
 from dotenv import load_dotenv
 load_dotenv()
 
 class BrokerSettings(BaseSettings):
-    rabbit_host: str = Field("RABBIT_HOST")
+    rabbit_host: str = Field("RABBIT_HOST", alias='rabbit_host')
     rabbit_port: str = Field("RABBIT_PORT")
     rabbit_user: str = Field("RABBIT_USER")
     rabbit_pass: str = Field("RABBIT_PASS")
@@ -23,6 +24,7 @@ class BrokerSettings(BaseSettings):
             port=self.rabbit_port,
         )
 
+
 class Settings(BaseSettings):
     project_name: str = Field(..., env="PROJECT_NAME")
 
@@ -32,9 +34,6 @@ class Settings(BaseSettings):
     redis_port: int = Field(..., env="REDIS_PORT")
 
     broker: BrokerSettings = BrokerSettings()
-
-    class Config:
-        env_file = BASE_DIR/".env"
 
 
 settings = Settings()
