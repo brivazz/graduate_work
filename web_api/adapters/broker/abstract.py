@@ -1,11 +1,21 @@
+"""Модуль с абстракным брокером сообщений."""
+
 import abc
+import uuid
+
+from pydantic import BaseModel
 
 
-class AbstractBroker(abc.ABC):
+class AbstractBrokerManager(abc.ABC):
+    """Абстрактный брокер сообщений."""
+
     @abc.abstractmethod
-    async def send_data(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def read_data(self, *args, **kwargs):
+    async def send_message(
+        self,
+        message: BaseModel,
+        routing_key: str,
+        correlation_id: uuid.UUID,
+        priority: int | None = None,
+    ):
+        """Метод отправки сообщения в очередь."""
         raise NotImplementedError
