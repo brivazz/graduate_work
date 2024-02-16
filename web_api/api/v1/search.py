@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, UploadFile, Depends, HTTPException, status
-from services.base import get_search_service, SearchService
+from services.search_service import get_search_service, SearchService
 
 
 router = APIRouter()
@@ -16,10 +16,9 @@ async def search_data(
     service: SearchService = Depends(get_search_service),
 ) -> uuid.UUID:
 
-    result = await service.create_task(
+    return await service.create_task(
         audio_file=file,
     )
-    return result
 
 
 @router.get(
