@@ -1,5 +1,6 @@
 from logging import config as logging_config
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 from loguru import logger
 
@@ -12,7 +13,7 @@ logging_config.dictConfig(LOGGING)
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = Field(..., env='PROJECT_NAME')
+    PROJECT_NAME: str = Field('PROJECT_NAME')
 
     REDIS_HOST: str = Field('REDIS_HOST')
     REDIS_PORT: int = Field('REDIS_PORT')
