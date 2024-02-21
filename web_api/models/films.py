@@ -1,3 +1,5 @@
+"""Модуль с классом модели фильма."""
+
 from base import BaseOrjsonModel
 
 class FilmResponseModel(BaseOrjsonModel):

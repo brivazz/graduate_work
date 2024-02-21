@@ -1,3 +1,5 @@
+"""Модуль с классом модели сообщения брокера."""
+
 from models.base import BaseOrjsonModel
 
 

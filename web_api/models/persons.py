@@ -1,3 +1,5 @@
+"""Модуль с классом модели персоны фильма."""
+
 from base import BaseOrjsonModel
 
 
