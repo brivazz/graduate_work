@@ -10,7 +10,7 @@ import base64
 # from graduate_work.web_api.adapters.broker.rabbit_broker.rabbit_manager import RabbitMq
 # from adapters.broker.abstract import AbstractQueue
 from adapters.cache.abstract import AbstractCache
-from adapters.managers.redis_manager import RedisStorage
+from adapters.managers.cache_manager import RedisStorage
 from core.config import settings
 
 from adapters.broker.abstract import AbstractBrokerManager
