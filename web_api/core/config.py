@@ -2,10 +2,12 @@ from pathlib import Path
 
 from pydantic import Field, ConfigDict
 from pydantic_settings import BaseSettings
-
-BASE_DIR = Path(__file__).parent.parent.parent.absolute()
 from dotenv import load_dotenv
+
+
 load_dotenv()
+BASE_DIR = Path(__file__).parent.parent.parent.absolute()
+
 
 class BrokerSettings(BaseSettings):
     rabbit_host: str = Field("RABBIT_HOST", alias='rabbit_host')
