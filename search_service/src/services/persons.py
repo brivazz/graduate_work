@@ -6,8 +6,10 @@ from fastapi import Depends
 from models.films import FilmResponseModel
 from models.persons import Person, PersonPage, PersonSort
 from redis.asyncio import Redis
-from services.utils.body_elastic import (get_body_query, get_body_search,
-                                         get_body_search_with_films)
+from services.utils.body_elastic import (
+    get_body_query, get_body_search,
+    get_body_search_with_films,
+)
 
 from .base import BaseService, ElasticStorage, RedisCache
 
@@ -21,31 +23,33 @@ class PersonService(BaseService):
     ) -> PersonPage | None:
         """Метод возвращает персону по id."""
 
-        data = await self.get_data_by_id(
+        data: dict = await self.get_data_by_id(
             person_id,
             'persons',
             self.FILM_CACHE_EXPIRE_IN_SECONDS,
         )
 
-        final_dict = {
+        final_dict: dict[str, list] = {
             'id': person_id,
             'full_name': data.get('full_name'),
             'films': [],
         }
 
-        body = get_body_search_with_films(
+        body: dict = get_body_search_with_films(
             value=person_id,
             field='id'
         )
 
-        data_list = await self.get_list(
+        data_list: list = await self.get_list(
             index='movies',
             body=body,
         )
 
         for item in data_list:
+            item: dict
             roles = []
             for person in item.get('actors'):
+                person: dict
                 if person.get('id') == person_id:
                     roles.append('actor')
 
@@ -121,14 +125,14 @@ class PersonService(BaseService):
             process_id: str = None
     ) -> list[PersonPage] | None:
 
-        body_person = get_body_query(
+        body_person: dict = get_body_query(
             field='full_name',
             value=query,
             size=page_size,
             offset=(page_size * page_number) - page_size,
         )
 
-        data_list_person = await self.get_list(
+        data_list_person: list = await self.get_list(
             index='persons',
             body=body_person,
             unique_key=query,
@@ -140,31 +144,34 @@ class PersonService(BaseService):
         persons_list = []
 
         for person in data_list_person:
+            person: dict
 
-            final_dict = {
+            final_dict: dict[str, list] = {
                 'id': person.get('id'),
                 'full_name': person.get('full_name'),
                 'films': [],
             }
 
-            body = get_body_search_with_films(
+            body: dict = get_body_search_with_films(
                 value=person.get('id'),
                 field='id'
             )
 
-            data_list = await self.get_list(
+            data_list: list = await self.get_list(
                 index='movies',
                 body=body,
                 unique_key=person.get('id')
             )
 
             for movie in data_list:
+                movie: dict
                 roles = []
                 for item in movie.get('actors'):
                     if item.get('id') == person.get('id'):
                         roles.append('actor')
 
                 for item in movie.get('directors'):
+                    item: dict
                     if item.get('id') == person.get('id'):
                         roles.append('director')
 
