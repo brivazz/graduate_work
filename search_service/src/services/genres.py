@@ -4,8 +4,11 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from models.genres import (GenreDetailResponseModel, GenreResponseModel,
-                           GenreSort)
+from models.genres import (
+    GenreDetailResponseModel,
+    GenreResponseModel,
+    GenreSort
+)
 from services.utils.body_elastic import get_body_search
 
 from .base import BaseService, ElasticStorage, RedisCache
