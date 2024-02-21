@@ -97,7 +97,7 @@ class FilmService:
             await self.base_service.cache_handler.set_by_id(
                 key=str(process_id),
                 value=(
-                    json.dumps([FilmResponseModel(**i).dict() for i in data_list])
+                    json.dumps([FilmResponseModel(**i).model_dump() for i in data_list])
                     if data_list
                     else json.dumps([])
                 ),
