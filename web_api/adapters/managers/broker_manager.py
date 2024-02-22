@@ -1,5 +1,6 @@
 import uuid
 
+from pydantic import BaseModel
 from fastapi import Depends
 
 from adapters.broker.abstract import AbstractBrokerManager
@@ -14,13 +15,13 @@ class BrokerManager(AbstractBrokerManager):
 
     async def send_message(
         self,
-        message: dict,
+        message: BaseModel,
         routing_key: str,
         correlation_id: uuid.UUID,
         priority: int | None = None,
     ):
         await self.sender.send(
-            message=message,
+            message=message.model_dump_json().encode(),
             routing_key=routing_key,
             correlation_id=correlation_id,
             priority=priority,

@@ -47,7 +47,7 @@ class SearchService:
                 print('Файл получен')
 
             await self.queue_handler.send_message(
-                message=QueueMessage(file=file).model_dump_json().encode(),
+                message=QueueMessage(file=file),
                 routing_key='events.files',
                 correlation_id=process_id,
                 priority=100,
